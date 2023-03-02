@@ -71,7 +71,6 @@ class TableViewCell: UITableViewCell {
     // MARK: - Method
 
     private func attribute() {
-        // TODO: - addAction
         let loadAction = UIAction { _ in
             self.image = nil
             Task {
@@ -115,8 +114,8 @@ class TableViewCell: UITableViewCell {
         ])
         // layout for subviews of stackView
         NSLayoutConstraint.activate([
-            pictureView.topAnchor.constraint(equalTo: stackView.topAnchor),
-            pictureView.bottomAnchor.constraint(equalTo: stackView.bottomAnchor),
+            pictureView.topAnchor.constraint(equalTo: stackView.topAnchor, constant: 4),
+            pictureView.bottomAnchor.constraint(equalTo: stackView.bottomAnchor, constant: -4),
             pictureView.widthAnchor.constraint(equalTo: pictureView.heightAnchor, multiplier: 1.5),
             progressBar.widthAnchor.constraint(greaterThanOrEqualTo: stackView.widthAnchor, multiplier: 0.3)
         ])

@@ -24,8 +24,6 @@ class ViewController: UIViewController {
 
     let tableView: UITableView = {
         $0.rowHeight = 80
-        $0.separatorColor = .clear
-        $0.separatorInset = UIEdgeInsets(top: 4, left: 0, bottom: 4, right: 0)
         $0.allowsSelection = false
         return $0
     }(UITableView())
@@ -65,6 +63,7 @@ class ViewController: UIViewController {
             tableView.leadingAnchor.constraint(equalTo: safeAreaGuide.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: safeAreaGuide.trailingAnchor)
         ])
+        tableView.separatorColor = .clear
     }
     
     private func setupButton() {
