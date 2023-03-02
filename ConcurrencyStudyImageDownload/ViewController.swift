@@ -11,6 +11,15 @@ class ViewController: UIViewController {
 
     // MARK: - Property
     
+    // TODO: json 읽기로 바꾸기
+    let imageURLStrings = [
+        "https://raw.githubusercontent.com/EuniceNam/ConcurrencyStudyImageDownload/main/ImagesToDownload/beach1.jpeg",
+        "https://raw.githubusercontent.com/EuniceNam/ConcurrencyStudyImageDownload/main/ImagesToDownload/cablecar1.jpeg",
+        "https://raw.githubusercontent.com/EuniceNam/ConcurrencyStudyImageDownload/main/ImagesToDownload/cat1.jpeg",
+        "https://raw.githubusercontent.com/EuniceNam/ConcurrencyStudyImageDownload/main/ImagesToDownload/lighthouse1.jpeg",
+        "https://raw.githubusercontent.com/EuniceNam/ConcurrencyStudyImageDownload/main/ImagesToDownload/sea1.jpeg"
+    ]
+
     // MARK: - View
 
     let tableView: UITableView = {
@@ -66,7 +75,30 @@ class ViewController: UIViewController {
     }
 
     private func loadAllImages() {
-        print("Load all images clicked")
+        let session = URLSession.shared
+        for i in 0...self.imageURLStrings.count-1 {
+            // set to default image
+            guard let cell = tableView.cellForRow(at: IndexPath(row: i, section: 0)) as? TableViewCell else {
+                print("err") // TODO: throw Error로 고치거나 하기
+                return
+            }
+            cell.image = UIImage(systemName: "photo")
+
+            guard let imageURL = URL(string: self.imageURLStrings[i]) else {
+                print("err") // TODO: throw Error로 고치거나 하기
+                return
+            }
+            Task {
+                let (imageData, response) = try! await session.data(from: imageURL) // TODO: try! 해결
+                guard let httpResponse = response as? HTTPURLResponse,
+                      httpResponse.statusCode == 200 else {
+                    return
+                }
+                // Give time to see default image
+                try? await Task.sleep(for: .seconds(0.3))
+                cell.image = UIImage(data: imageData)
+            }
+        }
     }
 }
 
@@ -96,11 +128,13 @@ extension ViewController: UITableViewDelegate {
 
 extension ViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 5
+        return imageURLStrings.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: TableViewCell.cellName) as! TableViewCell
+        // TODO: guard let throw error로 변경
+        cell.imageURLString = imageURLStrings[indexPath.row]
         return cell
     }
 }

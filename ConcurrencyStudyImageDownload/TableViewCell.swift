@@ -11,9 +11,21 @@ class TableViewCell: UITableViewCell {
 
     // MARK: - Property
 
+    var imageURLString: String = ""
+    var image: UIImage? {
+        didSet {
+            if image != nil {
+                pictureView.image = self.image
+                pictureView.setNeedsDisplay()
+            } else {
+                pictureView.image = UIImage(systemName: "photo")
+            }
+        }
+    }
+
     // MARK: - View
 
-    let stackView: UIStackView = {
+    private let stackView: UIStackView = {
         $0.axis = .horizontal
         $0.alignment = .center
         $0.distribution = .equalSpacing
@@ -21,18 +33,18 @@ class TableViewCell: UITableViewCell {
         return $0
     }(UIStackView())
 
-    let pictureView: UIImageView = {
+    private let pictureView: UIImageView = {
         $0.contentMode = .scaleAspectFit
         return $0
     }(UIImageView(image: UIImage(systemName: "photo")))
     
-    let progressBar: UIProgressView = {
+    private let progressBar: UIProgressView = {
         $0.progress = 0.5 // TODO: 프로그레스 바가 진행도 반영하도록 수정하기
         $0.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         return $0
     }(UIProgressView())
     
-    let loadButton: UIButton = {
+    private let loadButton: UIButton = {
         var configuration = UIButton.Configuration.filled()
         configuration.buttonSize = .medium
         configuration.title = "Load"
@@ -41,8 +53,8 @@ class TableViewCell: UITableViewCell {
         return $0
     }(UIButton())
     
-    let leadingSpacingView = UIView(frame: CGRect())
-    let trailingSpacingView = UIView(frame: CGRect())
+    private let leadingSpacingView = UIView(frame: CGRect())
+    private let trailingSpacingView = UIView(frame: CGRect())
 
     // MARK: - Life Cycle
 
@@ -60,12 +72,33 @@ class TableViewCell: UITableViewCell {
 
     private func attribute() {
         // TODO: - addAction
-//        button.addAction(<#T##action: UIAction##UIAction#>, for: <#T##UIControl.Event#>)
+        let loadAction = UIAction { _ in
+            self.image = nil
+            Task {
+                await self.loadImage()
+            }
+        }
+        loadButton.addAction(loadAction, for: .touchUpInside)
     }
     
+    private func loadImage() async {
+        let session = URLSession.shared
+        guard let imageURL = URL(string: imageURLString) else {
+            print("err") // TODO: throw Error로 고치거나 하기
+            return
+        }
+        let (imageData, response) = try! await session.data(from: imageURL) // TODO: try! 해결
+        guard let httpResponse = response as? HTTPURLResponse,
+                httpResponse.statusCode == 200 else {
+            return
+        }
+        // Give time to check default image
+        try? await Task.sleep(for: .seconds(0.3))
+        self.image = UIImage(data: imageData)
+    }
+
     private func setupLayout() {
         // add subviews
-        addSubview(stackView)
         contentView.addSubview(stackView)
         [leadingSpacingView, pictureView, progressBar, loadButton, trailingSpacingView].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
