@@ -80,3 +80,28 @@ private func loadAllImages() {
 ```
 </div>
 </details>
+화면 업데이트 관련 부분:
+<details>
+<summary>
+`TableViewCell.swift`의 14-24줄
+</summary>
+<div>
+
+```TableViewCell.swift
+class TableViewCell: UITableViewCell {
+    ...
+    var image: UIImage? {
+        didSet {
+            if image != nil {
+                pictureView.image = self.image
+                pictureView.setNeedsDisplay()
+            } else {
+                pictureView.image = UIImage(systemName: "photo")
+            }
+        }
+    }
+   ...
+}
+```
+</div>
+</details>
